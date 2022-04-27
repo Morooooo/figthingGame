@@ -34,8 +34,7 @@ let enemy=new Sprite({position:{x:520,y:270},velocity:{x:0,y:0}})
 
 console.log(enemy,player);
 let keys={
-    a:{pressed:false},
-    d:{pressed:false}
+    
 }
 function animate(){
     window.requestAnimationFrame(animate);
@@ -43,20 +42,22 @@ function animate(){
     c.fillRect(0,0,canvas.width,canvas.height)
     player.update();
     enemy.update();
-    if(keys.a.pressed=true){player.velocity.x=-1;}
-    else if(keys.d.pressed=true){player.velocity.x=1;}
-
     console.log();
 }animate()
 window.addEventListener(`keydown`,(event)=>{//console.log(event.key)
     switch(event.key){
-        case `d` :keys.d.pressed=true; break; //
-        case `a` :keys.a.pressed=true; break;}//
+        case `ArrowRight` :player.velocity.x=5;break; //
+        case  `ArrowLeft` :player.velocity.x=-5; break;
+        case `ArrowUp`:player.velocity.y=-10;break;
+        
+    }//console.log(event.key)
 
 })/**/
 window.addEventListener(`keyup`,(event)=>{//console.log(event.key)
     switch(event.key){
-        case `d` :keys.d.pressed=false; break; //
-        case  `a` :keys.a.pressed=false; break;}//
+        case `ArrowRight` :player.velocity.x=0;break; //
+        case  `ArrowLeft` :player.velocity.x=0; break;
+        case `ArrowUp`: player.velocity.y=0;break;
+    }//
 
 })
