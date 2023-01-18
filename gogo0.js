@@ -1,4 +1,3 @@
-
 const canvas=document.querySelector('canvas');
 const c=canvas.getContext('2d');
 
@@ -44,12 +43,12 @@ const gravity=0.5;
 class Figther{
     constructor({position,velocity,color,lastKey,attackBox,imageSrc,scale,framesMax=1,sprites}){
 this.position=position;this.velocity=velocity;this.color=color;
-this.width=50;this.height=150;this.lastKey=lastKey;
+this.width=150;this.height=150;this.lastKey=lastKey;
 this.attackBox={
     position:this.position,
     width:100,
-    height:20,
-    color:'yellow'
+    height:150,
+    color:this.color
 };
 this.sprites=sprites
 for(let sprite in this.sprites){
@@ -60,34 +59,39 @@ for(let sprite in this.sprites){
 
 this.isAttacking=false;this.health=100;this.image=new Image();
 this.image.src=imageSrc;this.scale=scale;this.framesMax=framesMax;
-this.framesCurrent=0;this.framesElapsed=0;this.framesHold=5;this.sprites=sprites
+this.framesCurrent=0;this.framesElapsed=0;this.framesHold=5;this.sprites=sprites;
+this.dead=false;
     }
     draw(){
         /*c.fillStyle=this.color;
     c.fillRect(this.position.x,this.position.y,50,this.height);
    if(player.isAttacking) {c.fillStyle=player.attackBox.color
-    c.fillRect(player.attackBox.position.x,player.attackBox.position.y,
+     c.fillRect(player.attackBox.position.x,player.attackBox.position.y,
      player.attackBox.width,player.attackBox.height)
     }else if(enemy.isAttacking){c.fillStyle=enemy.attackBox.color
-        c.fillRect(enemy.attackBox.position.x+50,enemy.attackBox.position.y,
-         -100,enemy.attackBox.height)}*/
+        }*/
+        //c.fillRect(this.attackBox.position.x+150,this.attackBox.position.y,this.attackBox.width,this.attackBox.height)
          c.drawImage(this.image,
             this.framesCurrent*(this.image.width/this.framesMax),
             0,this.image.width/this.framesMax,this.image.height,
             this.position.x,this.position.y-100,
             (this.image.width/this.framesMax)*this.scale.x,this.image.height*this.scale.y)     
     }
-update(){
-
-    this.framesElapsed++
+    animateFrames(){
+         this.framesElapsed++;
     if(this.framesElapsed % this.framesHold==0){ 
          if(this.framesCurrent<this.framesMax-1){
         this.framesCurrent++
-    }else{this.framesCurrent=0} }
-    this.draw()
+    }else{ this.framesCurrent=0} }
+ }
+update(){
+    if(this.dead==false){
+        this.animateFrames()}
+          this.draw()
 
     this.position.y+=this.velocity.y;
     this.position.x+=this.velocity.x;
+  // c.fillRect(this.attackBox.position.x,this.attackBox.position.y,this.attackBox.width,this.attackBox.height)
     //gravity
    if(this.position.y+this.height+99+this.velocity.y
         >=canvas.height){
@@ -100,12 +104,30 @@ update(){
     this.switchSprite('attack')
     this.isAttacking=true;
     
-    setTimeout(()=>{
-        this.isAttacking=false},20)
+    setTimeout(()=>{this.isAttacking=false},20)
  }
+ takesHit(){
+    this.health-=5;
+ if(this.health==enemy.health){ 
+    document.querySelector(`#enemyHealth`).style.width=this.health+'%';  
+      if(this.health<=0){
+        this.switchSprite('death')}else{this.switchSprite('takeHit')}}
+    else if(this.health==player.health){ 
+        document.querySelector(`#playerHealth`).style.width=this.health+'%';
+    if(this.health<=0){this.switchSprite('death')}
+    else{this.switchSprite('takeHit')}}
+    
+ }
+ 
  switchSprite(sprite){
-    if(this.image==this.sprites.attack.image&&this.framesCurrent<this.sprites.attack.framesMax-1){
+    if (this.image==this.sprites.death.image){ return;}
+    if(this.image===this.sprites.attack.image&&this.framesCurrent<this.sprites.attack.framesMax-1){
         return}
+        if(this.image===this.sprites.takeHit.image&&this.framesCurrent<this.sprites.takeHit.framesMax-1){
+            return}
+  
+  
+ 
     switch(sprite){
    
     case 'idle':if(this.image!==this.sprites.idle.image) {this.image=this.sprites.idle.image};
@@ -118,18 +140,25 @@ update(){
        this.framesMax=this.sprites.fall.framesMax; break
        case 'attack': if( this.image!==this.sprites.attack.image){ this.image=this.sprites.attack.image};
        this.framesMax=this.sprites.attack.framesMax; break
+       case 'takeHit':if (this.image!=this.sprites.takeHit.image){this.image=this.sprites.takeHit.image};
+       this.framesMax=this.sprites.takeHit.framesMax;break;
+       case 'death':if (this.image!=this.sprites.death.image){this.image=this.sprites.death.image};
+       this.framesMax=this.sprites.death.framesMax;break;
    }
  }
+ 
 }
 const lastKey='';
 const player=new Figther({
-    position:{x:0, y:0},imageSrc:'./Sprites/Idle.png',
+    position:{x:150, y:0},imageSrc:'./Sprites/Idle.png',//attackBox:{position:{x:10,y:0}},
      scale:{x:2,y:2},velocity:{x:0,y:0},framesMax:8,
     sprites:{idle:{imageSrc:'./Sprites/Idle.png',framesMax:8},
     run:{imageSrc:'./Sprites/Run.png',framesMax:8},
     jump:{imageSrc:'./Sprites/Jump.png',framesMax:2},
     fall:{imageSrc:'./Sprites/Fall.png',framesMax:2},
-    attack:{imageSrc:'./Sprites/Attack1.png',framesMax:6}  }
+    attack:{imageSrc:'./Sprites/Attack1.png',framesMax:6},
+death:{imageSrc:'./Sprites/Death.png',framesMax:6},
+takeHit:{imageSrc:'./Sprites/Take Hit - white silhouette.png',framesMax:4}   }
    
 })
 const background=new Sprite({x:0,y:0},{imageSrc:'./images/images.png'},1,0)
@@ -142,12 +171,17 @@ const cloud=new Sprite({x:100,y:50},{imageSrc:'./images/moving-clouds-gif-transp
 0.7,0.04,1,{x:0,y:-440})
 
 const enemy=new Figther(
-   {position: {x:100,y:50},imageSrc:'./Sprites/IdleEnemy.png',
-    scale:{x:2,y:2},velocity:{x:0,y:0},framesMax:8,sprites:{idle:{imageSrc:'./Sprites/IdleEnemy.png',framesMax:8},
-    run:{imageSrc:'./Sprites/RunEnemy.png',framesMax:8},jump:{imageSrc:'./Sprites/JumpEnemy.png',framesMax:2},
-fall:{imageSrc:'./Sprites/FallEnemy.png',framesMax:2},attack:{imageSrc:'./Sprites/Attack1Enemy.png',framesMax:6} }}
+   {position: {x:365,y:0},imageSrc:'./Sprites/IdleEnemy.png',
+    scale:{x:2.5,y:2},velocity:{x:0,y:0},framesMax:8,
+    sprites:{idle:{imageSrc:'./Sprites/IdleEnemy.png',framesMax:8},
+    run:{imageSrc:'./Sprites/RunEnemy.png',framesMax:8},
+    jump:{imageSrc:'./Sprites/JumpEnemy.png',framesMax:2},
+fall:{imageSrc:'./Sprites/FallEnemy.png',framesMax:2},
+attack:{imageSrc:'./Sprites/Attack1Enemy.png',framesMax:6},
+death:{imageSrc:'./Sprites/DeathEnemy.png',framesMax:6},
+takeHit:{imageSrc:'./Sprites/Take HitEnemy - white silhouette.png',framesMax:4}  }}
     )
-    console.log(enemy.sprites)
+    //console.log(enemy.sprites)
 const keys={
         a:{pressed:false},d:{pressed:false},s:{pressed:false},
         Arrowleft:{pressed:false},ArrowUp:{pressed:false},ArrowRigth:{pressed:false}
@@ -183,33 +217,46 @@ function animate(){
     background.update()
     cloud.update()
    // hero.update()
-    player.update()
+   
     enemy.update()
-enemy.switchSprite('idle')
+     player.update()
+     //>>>>>>>>>>>>>>enemy movement>>>>>>>>>>>>>>>
+enemy.health>=0?enemy.switchSprite('idle'):enemy.dead=true;
     if(keys.a.pressed){
   enemy.velocity.x=-3;enemy.switchSprite('run')
-    }else if(keys.d.pressed) {enemy.velocity.x=3;enemy.switchSprite('run')}
+    }else if(keys.d.pressed) {
+        enemy.velocity.x=3;enemy.switchSprite('run')}
     else if(enemy.velocity.y<0){
  enemy.switchSprite('jump'); 
- enemy.framesMax=enemy.sprites.jump.framesMax
-    }else if(enemy.velocity.y>0){enemy.switchSprite('fall')}
-    player.switchSprite('idle')
+    }else if(enemy.velocity.y>0){
+        enemy.switchSprite('fall')}
+    else if(
+        enemy.isAttacking){player.switchSprite('takeHit')}
+    //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>player movement>>>>>>
+    player.health>=0?player.switchSprite('idle'):player.dead=true;
     if(keys.Arrowleft.pressed){
         player.velocity.x=-3;player.switchSprite('run')
           }else if(keys.ArrowRigth.pressed) {player.velocity.x=3;player.switchSprite('run')}
           else if(player.velocity.y<0){player.switchSprite('jump')}else if(player.velocity.y>0){
-            player.switchSprite('fall')}
+            player.switchSprite('fall')}else if(player.isAttacking){enemy.switchSprite('takeHit')}
+           
  //detect collision
 
- if(player.attackBox.position.x+100>=enemy.position.x&&player.attackBox.position.x<enemy.position.x+50
-    &&player.attackBox.position.y+20>=enemy.position.y&&player.isAttacking){console.log('Oh!');enemy.health-=5;document.querySelector('#enemyHealth').style.width=enemy.health+'%'} 
-    if(enemy.attackBox.position.x-50<=player.position.x+50&&enemy.attackBox.position.x-50>player.position.x
-        &&enemy.attackBox.position.y+20>=player.position.y&&enemy.isAttacking){console.log('Of!'); player.health-=5;document.querySelector('#playerHealth').style.width=player.health+'%'}          
+ if(player.position.x+210>=enemy.position.x&&player.position.x<enemy.position.x+50
+    &&player.position.y+150>=enemy.position.y&&player.isAttacking){console.log('Oh!');
+    enemy.switchSprite('takeHit');enemy.takesHit()
+    } 
+    if(enemy.position.x-170<=player.position.x+40&&enemy.position.x-50>player.position.x
+        &&enemy.position.y+150>=player.position.y&&enemy.isAttacking){console.log('Of!');
+        player.switchSprite('takeHit'); player.takesHit();
+        }          
 //determine winner based on death
         if(enemy.health<=0||player.health<=0) {
             clearTimeout(timerId)
             determineWinner(enemy,player)
-        }   }
+            } 
+    
+    }
 animate()
 window.addEventListener('keydown',(e)=>{ //console.log(e.key)
     switch(e.key){
@@ -222,7 +269,10 @@ window.addEventListener('keydown',(e)=>{ //console.log(e.key)
         case 'd':keys.d.pressed=true,enemy.lastKey=='d';break;
         case 'Enter':enemy.attack();enemy.switchSprite('attack');break;
     }   
-    window.addEventListener('keyup',(e)=>{
+    
+    
+})
+window.addEventListener('keyup',(e)=>{
         switch(e.key){
             case 'ArrowRight':player.velocity.x=0,keys.ArrowRigth.pressed=false;break;
             case 'ArrowLeft':player.velocity.x=0,keys.Arrowleft.pressed=false;break;
@@ -232,5 +282,4 @@ window.addEventListener('keydown',(e)=>{ //console.log(e.key)
             case 'd':enemy.velocity.x=0,keys.d.pressed=false;break;
         }
     })
-    
-})
+
