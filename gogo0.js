@@ -113,14 +113,15 @@ update(){
       if(this.health<=0){
         this.switchSprite('death')}else{this.switchSprite('takeHit')}}
     else if(this.health==player.health){ 
-        document.querySelector(`#playerHealth`).style.width=this.health+'%';
+        // document.querySelector(`#playerHealth`).style.width=this.health+'%';
+       gsap.to('#playerHealth',{width:this.health+'%'})
     if(this.health<=0){this.switchSprite('death')}
     else{this.switchSprite('takeHit')}}
     
  }
  
  switchSprite(sprite){
-    if (this.image==this.sprites.death.image){ return;}
+    if (this.image==this.sprites.death.image){ this.image==this.sprites.death.image.framesMax-1; return;}
     if(this.image===this.sprites.attack.image&&this.framesCurrent<this.sprites.attack.framesMax-1){
         return}
         if(this.image===this.sprites.takeHit.image&&this.framesCurrent<this.sprites.takeHit.framesMax-1){
@@ -189,6 +190,7 @@ const keys={
     let timer=30;
     let timerId;
     function determineWinner(enemy,player){
+        //document.querySelector('#result').setAttribute('style','color:green')
         if(player.health>enemy.health){document.querySelector('#result').innerHTML='Player won'}
         else if(enemy.health>player.health){
          document.querySelector('#result').innerHTML='Enemy won'
@@ -215,6 +217,9 @@ function animate(){
     c.fillRect(0,0,canvas.width,canvas.height)
    
     background.update()
+    c.fillStyle='rgba(255,255,255,0.2)'
+    c.fillRect(0,0,canvas.width,canvas.height)
+    
     cloud.update()
    // hero.update()
    
@@ -258,18 +263,24 @@ enemy.health>=0?enemy.switchSprite('idle'):enemy.dead=true;
     
     }
 animate()
+
 window.addEventListener('keydown',(e)=>{ //console.log(e.key)
-    switch(e.key){
+    if(!player.dead){
+        switch(e.key){
         case 'ArrowLeft':keys.Arrowleft.pressed=true,player.lastKey=='Arrowleft';break;
         case 'ArrowRight':keys.ArrowRigth.pressed=true,player.lastKey=='ArrowRigth';break;
         case 'ArrowUp':player.velocity.y=-20;player.switchSprite('jump'); break;
         case ' ':player.attack();player.switchSprite('attack');break;
-        case 'a':keys.a.pressed=true,enemy.lastKey=='a';break;
+       
+    }  }
+    
+    if(!enemy.dead){ 
+        switch(e.key){ case 'a':keys.a.pressed=true,enemy.lastKey=='a';break;
         case 's':enemy.velocity.y=-20;enemy.switchSprite('jump'); break;
         case 'd':keys.d.pressed=true,enemy.lastKey=='d';break;
-        case 'Enter':enemy.attack();enemy.switchSprite('attack');break;
-    }   
-    
+        case 'Enter':enemy.attack();enemy.switchSprite('attack');break; }
+     } 
+   
     
 })
 window.addEventListener('keyup',(e)=>{
@@ -282,4 +293,3 @@ window.addEventListener('keyup',(e)=>{
             case 'd':enemy.velocity.x=0,keys.d.pressed=false;break;
         }
     })
-
