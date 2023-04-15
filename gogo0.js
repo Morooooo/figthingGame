@@ -162,7 +162,7 @@ death:{imageSrc:'./Sprites/Death.png',framesMax:6},
 takeHit:{imageSrc:'./Sprites/Take Hit - white silhouette.png',framesMax:4}   }
    
 })
-const background=new Sprite({x:0,y:0},{imageSrc:'./images/images.png'},1,0)
+const background=new Sprite({x:0,y:0},{imageSrc:'./images/images.png'},2,0)
 const hero=new Sprite({x:0,y:233},{imageSrc:'./Sprites/Idle.png'},2,0,8)
 /*background.setAttribute('width','950')
 background.setAttribute('height','550')
